@@ -2,6 +2,14 @@ package br.com.fiap.api.models;
 
 import java.time.LocalDateTime;
 
+import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.Pageable;
+
+import br.com.fiap.api.controllers.MercadoController;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,5 +46,15 @@ public class Mercado {
     private String cnpj;
     
     private double preco_minimo;
+
+    public EntityModel<Mercado> toEntityModel(){
+        return EntityModel.of(
+            this, 
+            linkTo(methodOn(MercadoController.class).show(id)).withSelfRel(),
+            linkTo(methodOn(MercadoController.class).destroy(id)).withRel("delete"),
+            linkTo(methodOn(MercadoController.class).index(null, Pageable.unpaged())).withRel("all")
+        );
+
+    }
 
 }

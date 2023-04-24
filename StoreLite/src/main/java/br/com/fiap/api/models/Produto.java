@@ -1,7 +1,18 @@
 package br.com.fiap.api.models;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
+
+
+
+import br.com.fiap.api.controllers.ProdutoController;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -47,5 +58,15 @@ public class Produto {
 
     @ManyToOne
     private Mercado mercado;
+
+    public EntityModel<Produto> toEntityModel(){
+        return EntityModel.of(
+            this, 
+            linkTo(methodOn(ProdutoController.class).show(id)).withSelfRel(),
+            linkTo(methodOn(ProdutoController.class).destroy(id)).withRel("delete"),
+            linkTo(methodOn(ProdutoController.class).index(null, Pageable.unpaged())).withRel("all")
+            
+        );
+    }
 
 }
