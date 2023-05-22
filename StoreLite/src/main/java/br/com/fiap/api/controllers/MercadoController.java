@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.fiap.api.exceptions.RestNotFoundException;
 import br.com.fiap.api.models.Mercado;
 import br.com.fiap.api.repositories.MercadoRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,10 +47,12 @@ public class MercadoController {
 
     @Autowired
     PagedResourcesAssembler<Object> assembler;
+    @SecurityRequirement(name = "bearer-key")
+    @Tag(name = "mercado")
 
 
     @GetMapping
-    public PagedModel<EntityModel<Object>> index(@RequestParam(required = false) String busca, @PageableDefault(size = 5) Pageable pageable){
+    public PagedModel<EntityModel<Object>> index(@RequestParam(required = false) String busca, @ParameterObject @PageableDefault(size = 5) Pageable pageable){
         Page<Mercado> mercados = (busca == null)?
         
         repository.findAll(pageable):
@@ -58,6 +65,10 @@ public class MercadoController {
 
 
     @PostMapping("/api/mercado")
+    @ApiResponses ({
+        @ApiResponse(responseCode = "201", description = "Mercado cadastrado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Os campos enviados são inválidos")
+    })
     public ResponseEntity<Object> create(@RequestBody @Valid Mercado mercado){
         log.info("Cadastrando mercado" + mercado);
         repository.save(mercado);

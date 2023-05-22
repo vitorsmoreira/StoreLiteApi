@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,13 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.fiap.api.exceptions.RestNotFoundException;
 import br.com.fiap.api.models.Produto;
 import br.com.fiap.api.repositories.ProdutoRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,9 +49,11 @@ public class ProdutoController {
 
     @Autowired
     PagedResourcesAssembler<Object> assembler;
+    @SecurityRequirement(name = "bearer-key")
+    @Tag(name = "produto")
 
     @GetMapping
-    public PagedModel<EntityModel<Object>> index(@RequestParam(required = false) String busca, @PageableDefault(size = 5) Pageable pageable){
+    public PagedModel<EntityModel<Object>> index(@RequestParam(required = false) String busca, @ParameterObject @PageableDefault(size = 5) Pageable pageable){
         Page<Produto> produtos = (busca == null)?
             repository.findAll(pageable):
             repository.findByNomeContaining(busca, pageable);
@@ -54,6 +64,10 @@ public class ProdutoController {
 
     
     @PostMapping("/api/produto")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Produto cadastrado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Campos enviados são inválidos")
+        })
     public ResponseEntity<Object> create(@RequestBody @Valid Produto produto){
         log.info("Cadastrando produto" + produto);
         repository.save(produto);
